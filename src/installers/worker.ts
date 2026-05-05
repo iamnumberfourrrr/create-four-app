@@ -1,0 +1,29 @@
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { copyTemplate } from "../helpers/copy-template.js";
+import { register } from "../core/registry.js";
+import type { Installer, FileOp, InstallerContext } from "../core/installer.js";
+
+// "../templates" resolves correctly from dist/index.js (bundled by tsup)
+const TEMPLATE_DIR = fileURLToPath(new URL("../templates/worker", import.meta.url));
+
+const workerInstaller: Installer = {
+  name: "worker",
+
+  async install(ctx: InstallerContext): Promise<FileOp[]> {
+    const vars: Record<string, unknown> = {
+      projectName: ctx.projectName,
+      projectScope: `@${ctx.projectName}`,
+      nodeVersion: "22",
+    };
+
+    const dest = join(ctx.projectDir, "apps", "worker");
+    await copyTemplate(TEMPLATE_DIR, dest, vars);
+
+    return [];
+  },
+};
+
+register(workerInstaller);
+
+export { workerInstaller };

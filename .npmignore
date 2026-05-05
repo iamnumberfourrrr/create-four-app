@@ -1,0 +1,9 @@
+src/
+*.config.ts
+tsconfig.json
+oxlint.json
+oxfmt.toml
+plans/
+docs/
+.git/
+node_modules/

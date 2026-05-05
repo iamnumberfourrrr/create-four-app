@@ -1,0 +1,54 @@
+{
+  "name": "create-four-app",
+  "version": "0.1.0",
+  "description": "Opinionated CLI that scaffolds a pnpm monorepo with TanStack Start/Router, Drizzle, Oxlint+Oxfmt, Vitest browser-mode",
+  "bin": {
+    "create-four-app": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint .",
+    "fmt": "oxfmt --write .",
+    "fmt:check": "oxfmt --check .",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "create-app",
+    "scaffold",
+    "tanstack",
+    "drizzle",
+    "monorepo"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tuannguyenbb/create-four-app"
+  },
+  "bugs": "https://github.com/tuannguyenbb/create-four-app/issues",
+  "homepage": "https://github.com/tuannguyenbb/create-four-app#readme",
+  "dependencies": {
+    "@clack/prompts": "^0.9.1",
+    "cac": "^6.7.14",
+    "picocolors": "^1.1.1",
+    "tinyexec": "^0.3.2",
+    "yaml": "^2.8.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "oxfmt": "^0.47.0",
+    "oxlint": "^0.16.7",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.5"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

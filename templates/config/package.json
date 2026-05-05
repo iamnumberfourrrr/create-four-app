@@ -1,0 +1,22 @@
+{
+  "name": "{{projectScope}}/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./oxlint.json": "./oxlint.json",
+    "./oxfmt.toml": "./oxfmt.toml",
+    "./env": "./env/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "3.24.3"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3",
+    "vite": "8.0.10"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "{{projectScope}}/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc --noEmit && echo 'build ok'",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint .",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check ."
+  },
+  "devDependencies": {
+    "@types/node": "22.15.3",
+    "oxfmt": "0.47.0",
+    "oxlint": "0.16.7",
+    "tsx": "4.21.0",
+    "typescript": "5.8.3"
+  }
+}
