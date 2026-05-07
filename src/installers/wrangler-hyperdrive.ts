@@ -197,6 +197,44 @@ console.log("  2. Verify the binding in Cloudflare dashboard");
 `;
 }
 
+// ─── SETUP.md section ────────────────────────────────────────────────────────
+
+const SETUP_SECTION_HYPERDRIVE = `
+## Cloudflare Hyperdrive (Postgres connection pooler)
+
+Hyperdrive caches connections + queries between your Worker and your
+Postgres database. Required for production deploys; skip for local dev.
+
+### Prerequisites
+
+- Your real \`DATABASE_URL\` (postgres://, NOT pglite://) is in \`.env\`.
+- The Cloudflare account ID + API token are configured (see the Cloudflare
+  Workers section above).
+
+### Run the setup script
+
+\`\`\`
+pnpm cf:hyperdrive
+\`\`\`
+
+This script:
+1. Calls \`wrangler hyperdrive create\` with your DATABASE_URL.
+2. Parses the returned ID.
+3. Patches \`apps/web/wrangler.jsonc\` with the HYPERDRIVE binding.
+4. Records the ID in \`.four.json\` for tracking.
+
+Re-run with \`--force\` to replace an existing binding (e.g. database moved).
+
+### Use it in code
+
+Inside a Worker request handler the binding is exposed as \`env.HYPERDRIVE\`.
+The Drizzle setup in \`packages/db/\` reads from
+\`HYPERDRIVE.connectionString\` when running on Cloudflare; locally it
+falls back to \`DATABASE_URL\`.
+
+---
+`;
+
 // ─── Sub-installer function (called by wrangler installer) ───────────────────
 
 export function buildHyperdriveOps(ctx: InstallerContext): FileOp[] {
@@ -224,6 +262,11 @@ export function buildHyperdriveOps(ctx: InstallerContext): FileOp[] {
           tsx: "^4.19.4",
         },
       },
+    },
+    {
+      kind: "append",
+      path: "SETUP.md",
+      content: SETUP_SECTION_HYPERDRIVE,
     },
   ];
 }

@@ -137,6 +137,27 @@ export function printPostScaffold(ctx: InstallerContext, projectDir: string): vo
     console.log();
   }
 
-  // 5. URL line
+  // 5. SETUP.md pointer when modules need manual config
+  if (hasManualSetup(ctx)) {
+    console.log(pc.bold("Manual setup needed:"));
+    console.log(`  Read ${pc.cyan("./SETUP.md")} for step-by-step instructions.`);
+    console.log();
+  }
+
+  // 6. URL line
   console.log(pc.dim("Open http://localhost:3000"));
+}
+
+function hasManualSetup(ctx: InstallerContext): boolean {
+  const m = ctx.modules as Record<string, unknown>;
+  const auth = m["auth"];
+  return Boolean(
+    m["wrangler"] ||
+      m["docker"] ||
+      m["ci"] ||
+      m["db"] === "postgres" ||
+      m["db"] === "mixed-pg" ||
+      m["db"] === "sqlite" ||
+      (Array.isArray(auth) && auth.length > 0),
+  );
 }

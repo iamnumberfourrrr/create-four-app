@@ -3,8 +3,14 @@ dist/
 .vite/
 .output/
 .vinxi/
+.tanstack/
+.cache/
 *.env
 *.env.*
 !*.env.example
 .DS_Store
 *.local
+*.log
+.idea/
+.vscode/
+coverage/

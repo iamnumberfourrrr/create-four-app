@@ -827,6 +827,130 @@ const I18N_AUTH_KEYS = {
 
 // ─── Installer ────────────────────────────────────────────────────────────────
 
+// ─── SETUP.md builder ────────────────────────────────────────────────────────
+
+function buildAuthSetupSection(providers: string[]): string {
+  const intro = `
+## Authentication (better-auth)
+
+You enabled: ${providers.map((p) => `\`${p}\``).join(", ")}.
+
+### Generate the auth secret
+
+Add a long random string to \`.env\`:
+
+\`\`\`
+BETTER_AUTH_SECRET=$(openssl rand -base64 32)
+BETTER_AUTH_URL=http://localhost:3000
+\`\`\`
+
+In production, set \`BETTER_AUTH_URL\` to the deployed origin.
+
+### Apply the schema
+
+Auth tables ship as a fragment under \`packages/db/src/schema/auth.ts\` —
+they're picked up by the next \`pnpm db:push\` (or \`db:generate\` +
+\`db:migrate\`). Then seed a dev user:
+
+\`\`\`
+pnpm db:push
+pnpm db:seed
+\`\`\`
+
+`;
+
+  const sections: string[] = [intro];
+
+  if (providers.includes("email-password")) {
+    sections.push(`### Email + password
+
+No external setup required. Users sign up at \`/signup\`, log in at \`/login\`.
+
+> Production note: better-auth ships with no email transport. Wire your own
+> provider (Resend, Postmark, etc.) into the \`onPasswordReset\` /
+> \`sendVerificationEmail\` hooks in \`apps/web/src/server/auth/index.ts\` if
+> you need email flows.
+
+`);
+  }
+
+  if (providers.includes("github")) {
+    sections.push(`### GitHub OAuth
+
+1. https://github.com/settings/developers → **New OAuth App**.
+2. Application name: anything. Homepage URL: \`http://localhost:3000\`.
+3. **Authorization callback URL**: \`http://localhost:3000/api/auth/callback/github\`.
+4. Click **Register application** → copy **Client ID**.
+5. **Generate a new client secret** → copy it.
+6. Set in \`.env\`:
+   \`\`\`
+   GITHUB_CLIENT_ID=<id>
+   GITHUB_CLIENT_SECRET=<secret>
+   \`\`\`
+7. For production: register a second OAuth app with the prod callback URL
+   (\`https://<your-domain>/api/auth/callback/github\`) and use those creds
+   in your prod env.
+
+`);
+  }
+
+  if (providers.includes("google")) {
+    sections.push(`### Google OAuth
+
+1. https://console.cloud.google.com/apis/credentials → pick or create a
+   project → **Create Credentials** → **OAuth client ID**.
+2. Application type: **Web application**.
+3. **Authorized redirect URIs**: \`http://localhost:3000/api/auth/callback/google\`
+   (add your prod URL too).
+4. Copy the **Client ID** and **Client secret**.
+5. Set in \`.env\`:
+   \`\`\`
+   GOOGLE_CLIENT_ID=<id>
+   GOOGLE_CLIENT_SECRET=<secret>
+   \`\`\`
+6. (Optional) Configure the OAuth consent screen if you haven't —
+   required before non-test users can log in.
+
+`);
+  }
+
+  if (providers.includes("discord")) {
+    sections.push(`### Discord OAuth
+
+1. https://discord.com/developers/applications → **New Application**.
+2. **OAuth2** tab → copy **Client ID** + reset and copy **Client Secret**.
+3. **OAuth2** → **Redirects** → add
+   \`http://localhost:3000/api/auth/callback/discord\` (and prod URL).
+4. Set in \`.env\`:
+   \`\`\`
+   DISCORD_CLIENT_ID=<id>
+   DISCORD_CLIENT_SECRET=<secret>
+   \`\`\`
+
+`);
+  }
+
+  if (providers.includes("passkeys")) {
+    sections.push(`### Passkeys (WebAuthn)
+
+No external service to provision. The browser handles registration and
+authentication ceremonies; better-auth stores the credentials in your
+\`auth_passkey\` table.
+
+> Passkeys require an HTTPS origin in production. Localhost is exempted
+> by all browsers, so dev works without TLS.
+
+`);
+  }
+
+  sections.push(`---
+`);
+
+  return sections.join("");
+}
+
+// ─── Installer ────────────────────────────────────────────────────────────────
+
 const authInstaller: Installer = {
   name: "auth",
 
@@ -1056,6 +1180,13 @@ const authInstaller: Installer = {
           auth: providers,
         },
       },
+    });
+
+    // ── SETUP.md — one big section per provider ───────────────────────────
+    ops.push({
+      kind: "append",
+      path: "SETUP.md",
+      content: buildAuthSetupSection(providers),
     });
 
     return ops;

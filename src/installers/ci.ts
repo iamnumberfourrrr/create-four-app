@@ -117,6 +117,7 @@ const ciInstaller: Installer = {
     if (!modules["ci"]) return [];
 
     const content = composeWorkflow(ctx);
+    const wantsWranglerDeploy = Boolean(modules["wrangler"]);
 
     return [
       {
@@ -124,9 +125,48 @@ const ciInstaller: Installer = {
         path: join(".github", "workflows", "ci.yml"),
         content,
       },
+      {
+        kind: "append",
+        path: "SETUP.md",
+        content: buildCiSetupSection(wantsWranglerDeploy),
+      },
     ];
   },
 };
+
+function buildCiSetupSection(wantsWranglerDeploy: boolean): string {
+  const wranglerBlock = wantsWranglerDeploy
+    ? `
+
+### Cloudflare deploy from CI
+
+To let CI run \`pnpm deploy:cf\`, add these secrets via the GitHub UI or CLI:
+
+\`\`\`
+gh secret set CLOUDFLARE_API_TOKEN
+gh secret set CLOUDFLARE_ACCOUNT_ID
+\`\`\`
+
+Use a token created with the **Edit Cloudflare Workers** template (see the
+Cloudflare Workers section above). The CI workflow already references
+both secrets — no edits required.`
+    : "";
+
+  return `
+## GitHub Actions CI
+
+The generated \`.github/workflows/ci.yml\` runs typecheck + lint + test on
+every push and PR. It needs no secrets to start.
+${wranglerBlock}
+
+### Branch protection (recommended)
+
+In GitHub → **Settings** → **Branches** → add a rule for \`main\` (or your
+default branch) requiring the \`ci\` workflow to pass before merging.
+
+---
+`;
+}
 
 register(ciInstaller);
 

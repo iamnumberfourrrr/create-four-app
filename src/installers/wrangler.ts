@@ -68,6 +68,79 @@ CLOUDFLARE_ACCOUNT_ID=
 CLOUDFLARE_API_TOKEN=
 `;
 
+// ─── .gitignore append ───────────────────────────────────────────────────────
+
+const GITIGNORE_APPEND = `
+# Cloudflare / wrangler
+.wrangler/
+.dev.vars
+apps/*/.wrangler/
+`;
+
+// ─── SETUP.md section: Cloudflare account ─────────────────────────────────────
+
+function buildSetupSectionWrangler(projectName: string): string {
+  return `
+## Cloudflare Workers / Pages
+
+Required to run \`pnpm deploy:cf\`. Local \`pnpm dev\` does not need this.
+
+### 1. Find your Account ID
+
+Open https://dash.cloudflare.com → any workers page → the right sidebar shows
+**Account ID**. Copy it into \`.env\`:
+
+\`\`\`
+CLOUDFLARE_ACCOUNT_ID=<your-32-char-id>
+\`\`\`
+
+### 2. Create an API token
+
+https://dash.cloudflare.com/profile/api-tokens → **Create Token** →
+**Edit Cloudflare Workers** template. Scope it to your account; no zone
+permissions are needed unless you bind a custom domain (see step 4). Copy
+the token into \`.env\`:
+
+\`\`\`
+CLOUDFLARE_API_TOKEN=<your-token>
+\`\`\`
+
+### 3. Authenticate the wrangler CLI
+
+\`\`\`
+pnpm --filter ${projectName} exec wrangler login
+\`\`\`
+
+Or use the API token from step 2 directly: wrangler reads \`CLOUDFLARE_API_TOKEN\`
+from the env automatically.
+
+### 4. (Optional) Custom domain
+
+In \`apps/web/wrangler.jsonc\`, add:
+
+\`\`\`jsonc
+"routes": [
+  { "pattern": "<your-domain>", "custom_domain": true }
+]
+\`\`\`
+
+The zone for \`<your-domain>\` must already be on Cloudflare. Widen the API
+token in step 2 to include **Zone: DNS: Edit** and **Zone: Workers Routes: Edit**
+for that zone, then redeploy.
+
+### 5. Deploy
+
+\`\`\`
+pnpm deploy:cf
+\`\`\`
+
+Verify the URL printed by wrangler returns 200.
+
+---
+`;
+}
+
+
 // ─── Installer ────────────────────────────────────────────────────────────────
 
 const wranglerInstaller: Installer = {
@@ -121,6 +194,20 @@ const wranglerInstaller: Installer = {
         kind: "append",
         path: ".env.example",
         content: ENV_EXAMPLE_APPEND,
+      },
+
+      // .gitignore append (wrangler-specific cache + dev vars)
+      {
+        kind: "append",
+        path: ".gitignore",
+        content: GITIGNORE_APPEND,
+      },
+
+      // SETUP.md section — Cloudflare account + API token + (optional) custom domain
+      {
+        kind: "append",
+        path: "SETUP.md",
+        content: buildSetupSectionWrangler(ctx.projectName),
       },
 
       // wrangler devDep in apps/web

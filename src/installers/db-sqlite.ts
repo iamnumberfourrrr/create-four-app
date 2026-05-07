@@ -76,6 +76,36 @@ export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 `;
 
+const SETUP_SECTION_SQLITE = `
+## SQLite database
+
+The default \`DATABASE_URL=file:./local.db\` works as-is — no provisioning
+needed. The DB file is created on first connection and gitignored.
+
+### Apply the schema
+
+\`\`\`
+pnpm db:push       # fast — pushes current schema, no migration files
+pnpm db:generate   # creates SQL migrations under packages/db/migrations
+pnpm db:migrate    # applies migration files (use this in production)
+pnpm db:studio     # browse + edit data in a local web UI
+\`\`\`
+
+### Hosted SQLite (Turso, etc.)
+
+Replace \`DATABASE_URL\` with the hosted libsql URL plus auth token:
+
+\`\`\`
+DATABASE_URL=libsql://<your-db>.turso.io
+DATABASE_AUTH_TOKEN=<token>
+\`\`\`
+
+(You'll need to wire \`DATABASE_AUTH_TOKEN\` into \`packages/db/src/client.ts\`
+when moving off file-based SQLite.)
+
+---
+`;
+
 const dbSqliteInstaller: Installer = {
   name: "db-sqlite",
 
@@ -125,6 +155,20 @@ const dbSqliteInstaller: Installer = {
         kind: "append",
         path: ".env.example",
         content: "\n# Database (SQLite / libsql)\nDATABASE_URL=file:./local.db\n",
+      },
+
+      // .gitignore — local SQLite files
+      {
+        kind: "append",
+        path: ".gitignore",
+        content: "\n# Local SQLite files\n*.db\n*.db-journal\n*.db-wal\n*.db-shm\nlocal.db*\n",
+      },
+
+      // SETUP.md — sqlite is mostly automatic, just note migrations
+      {
+        kind: "append",
+        path: "SETUP.md",
+        content: SETUP_SECTION_SQLITE,
       },
     ];
 

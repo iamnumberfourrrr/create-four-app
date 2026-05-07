@@ -211,6 +211,48 @@ node_modules
 .gitignore
 `;
 
+// ─── SETUP.md builder ────────────────────────────────────────────────────────
+
+function buildDockerSetupSection(hasCompose: boolean): string {
+  const composeBlock = hasCompose
+    ? `
+### Local infrastructure (docker-compose)
+
+The generated \`docker-compose.yml\` runs the services your modules need
+(Postgres, etc.). Start them in the background:
+
+\`\`\`
+docker compose up -d
+docker compose logs -f
+\`\`\`
+
+Stop with \`docker compose down\`. Data lives in named volumes — wipe with
+\`docker compose down -v\`.
+
+`
+    : "";
+
+  return `
+## Docker
+
+### Prerequisites
+
+Install Docker Desktop (Mac/Windows) or Docker Engine + buildx (Linux):
+https://docs.docker.com/get-docker/.
+
+${composeBlock}### Build the app image
+
+\`\`\`
+pnpm docker:build
+\`\`\`
+
+This invokes \`docker buildx bake\` against the multi-stage \`Dockerfile\`.
+Output is the \`web\` runtime image. Push it to your registry of choice.
+
+---
+`;
+}
+
 // ─── Installer ────────────────────────────────────────────────────────────────
 
 const dockerInstaller: Installer = {
@@ -287,6 +329,13 @@ const dockerInstaller: Installer = {
       kind: "merge-json",
       path: ".four.json",
       patch: { modules: { docker: true } },
+    });
+
+    // SETUP.md — docker workflow + compose services
+    ops.push({
+      kind: "append",
+      path: "SETUP.md",
+      content: buildDockerSetupSection(composeContent !== null),
     });
 
     return ops;

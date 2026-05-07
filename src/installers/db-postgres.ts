@@ -126,6 +126,20 @@ const dbPostgresInstaller: Installer = {
         path: ".env.example",
         content: `\n# Database (PostgreSQL)\nDATABASE_URL=postgres://postgres:postgres@localhost:5432/${ctx.projectName}\n`,
       },
+
+      // .gitignore — local Postgres data dirs
+      {
+        kind: "append",
+        path: ".gitignore",
+        content: `\n# Local Postgres volumes\npgdata/\n.postgres-data/\n`,
+      },
+
+      // SETUP.md — Postgres provisioning + migration steps
+      {
+        kind: "append",
+        path: "SETUP.md",
+        content: buildPostgresSetupSection(ctx.projectName),
+      },
     ];
 
     // Wire apps/web/src/server/db.ts for TanStack Start (SSR/server functions)
@@ -140,6 +154,54 @@ const dbPostgresInstaller: Installer = {
     return ops;
   },
 };
+
+function buildPostgresSetupSection(projectName: string): string {
+  return `
+## PostgreSQL database
+
+### Option A — Docker (recommended for local dev)
+
+If you picked the \`docker\` module, just run:
+
+\`\`\`
+docker compose up -d
+\`\`\`
+
+This starts Postgres on port 5432 with the credentials baked into
+\`docker-compose.yml\`. The default \`DATABASE_URL\` already matches.
+
+### Option B — Existing Postgres instance
+
+Update \`.env\`:
+
+\`\`\`
+DATABASE_URL=postgres://<user>:<password>@<host>:<port>/${projectName}
+\`\`\`
+
+Create the database manually if needed:
+
+\`\`\`
+createdb ${projectName}
+\`\`\`
+
+### Option C — Hosted (Neon, Supabase, Railway, etc.)
+
+1. Create a Postgres database in your provider's console.
+2. Copy the connection string (must start with \`postgres://\` or \`postgresql://\`).
+3. Set it as \`DATABASE_URL\` in \`.env\`.
+
+### Apply the schema
+
+\`\`\`
+pnpm db:push       # fast — pushes current schema, no migration files
+pnpm db:generate   # creates SQL migrations under packages/db/migrations
+pnpm db:migrate    # applies migration files (use this in production)
+pnpm db:studio     # browse + edit data in a local web UI
+\`\`\`
+
+---
+`;
+}
 
 function buildWebDbReexport(projectScope: string): string {
   return `/**

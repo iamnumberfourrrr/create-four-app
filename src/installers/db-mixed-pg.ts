@@ -95,6 +95,40 @@ export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 `;
 
+const SETUP_SECTION_MIXED_PG = `
+## Database (mixed-pg: PGlite for dev, Postgres for prod)
+
+The client at \`packages/db/src/client.ts\` switches at runtime based on
+\`DATABASE_URL\`:
+
+- \`pglite://./.pglite-data\` → embedded PGlite (zero-install local dev).
+- \`postgres://...\` or \`postgresql://...\` → real Postgres.
+
+### Local dev
+
+Default works. The first \`pnpm db:push\` creates \`./.pglite-data/\`.
+
+### Production
+
+Set \`DATABASE_URL\` to a real Postgres URL in your deployed env (or in
+\`.env.production\`). Recommended providers: Neon, Supabase, Railway.
+
+If deploying to Cloudflare with the \`wrangler\` module, also run
+\`pnpm cf:hyperdrive\` to wire the Hyperdrive binding (see the
+Cloudflare Hyperdrive section).
+
+### Apply the schema
+
+\`\`\`
+pnpm db:push
+pnpm db:generate
+pnpm db:migrate
+pnpm db:studio
+\`\`\`
+
+---
+`;
+
 const dbMixedPgInstaller: Installer = {
   name: "db-mixed-pg",
 
@@ -156,6 +190,13 @@ const dbMixedPgInstaller: Installer = {
         kind: "append",
         path: ".gitignore",
         content: "\n# PGlite local data directory\n.pglite-data/\n",
+      },
+
+      // SETUP.md — explain mixed-pg dual-target behavior
+      {
+        kind: "append",
+        path: "SETUP.md",
+        content: SETUP_SECTION_MIXED_PG,
       },
     ];
 
