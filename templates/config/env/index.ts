@@ -1,44 +1,41 @@
-/// <reference types="vite/client" />
 import { z } from "zod";
 
 /**
- * Env composer: glob-loads all fragment schemas from ./fragments/*.ts
- * and merges them into a single parsed env object.
+ * Env composer (CJS-safe entry).
  *
- * This file is intended to be consumed by a Vite-bundled app (apps/web or apps/worker).
- * import.meta.glob is a Vite compile-time feature — do not run this file with Node directly.
+ * This file intentionally avoids any `import.meta` reference so it can be
+ * scanned by non-Vite tools (Vitest pre-bundle, tsx, esbuild) without
+ * emitting the warning:
+ *   "import.meta is not available with the cjs output format and will be empty"
  *
- * Phase 04+ drops fragment files into ./fragments/ — this file never changes.
- * When fragments dir is empty, returns {} (empty object).
+ * Vite-specific glob loading + import.meta.env access lives in `./vite.ts`,
+ * which is only resolved by Vite-bundled consumers via `@<scope>/config/env/vite`.
+ *
+ * Phase 04+ drops fragment files into ./fragments/ and either re-exports them
+ * from this file (CJS-safe) or wires the Vite-only entry depending on the
+ * consumer.
  */
 
-// Vite glob import of all fragment modules (compile-time, eager)
-const fragmentModules = import.meta.glob("./fragments/*.ts", { eager: true });
+export type FragmentModule = { schema: z.ZodObject<z.ZodRawShape> };
 
-type FragmentModule = { schema: z.ZodObject<z.ZodRawShape> };
-
-function isFragmentModule(m: unknown): m is FragmentModule {
-  return typeof m === "object" && m !== null && "schema" in m && m.schema instanceof z.ZodObject;
+export function isFragmentModule(m: unknown): m is FragmentModule {
+  if (typeof m !== "object" || m === null || !("schema" in m)) return false;
+  return m.schema instanceof z.ZodObject;
 }
 
-function buildSchema(): z.ZodObject<z.ZodRawShape> {
+export function composeEnv(
+  fragments: Record<string, unknown>,
+  rawEnv: Record<string, unknown>,
+): Record<string, unknown> {
   let merged: z.ZodRawShape = {};
-
-  for (const mod of Object.values(fragmentModules)) {
+  for (const mod of Object.values(fragments)) {
     if (isFragmentModule(mod)) {
       merged = { ...merged, ...mod.schema.shape };
     }
   }
-
-  return z.object(merged);
+  return z.object(merged).parse(rawEnv);
 }
 
-const envSchema = buildSchema();
-
-// Parse and validate import.meta.env against merged schema.
-// Returns {} when no fragments are loaded.
-export const env = envSchema.parse(
-  typeof import.meta !== "undefined" && import.meta.env ? import.meta.env : {},
-) as z.infer<typeof envSchema>;
-
+// Empty default export until Phase 04 wires real fragments via ./vite.ts.
+export const env: Record<string, unknown> = {};
 export type Env = typeof env;
