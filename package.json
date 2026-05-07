@@ -29,10 +29,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/tuannguyenbb/create-four-app"
+    "url": "https://github.com/iamnumberfourrrr/create-four-app"
   },
-  "bugs": "https://github.com/tuannguyenbb/create-four-app/issues",
-  "homepage": "https://github.com/tuannguyenbb/create-four-app#readme",
+  "bugs": "https://github.com/iamnumberfourrrr/create-four-app/issues",
+  "homepage": "https://github.com/iamnumberfourrrr/create-four-app#readme",
   "dependencies": {
     "@clack/prompts": "^0.9.1",
     "cac": "^6.7.14",
@@ -44,11 +44,17 @@
     "@types/node": "^22.15.3",
     "oxfmt": "^0.47.0",
     "oxlint": "^0.16.7",
+    "playwright": "^1.59.1",
     "tsup": "^8.4.0",
     "typescript": "^5.8.3",
     "vitest": "^4.1.5"
   },
   "engines": {
     "node": ">=22"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }
