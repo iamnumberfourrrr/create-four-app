@@ -1,6 +1,6 @@
 {
   "name": "create-four-app",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Opinionated CLI that scaffolds a pnpm monorepo with TanStack Start/Router, Drizzle, Oxlint+Oxfmt, Vitest browser-mode",
   "bin": {
     "create-four-app": "./dist/index.js"
