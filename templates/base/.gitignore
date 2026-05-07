@@ -1,16 +1,32 @@
+# Dependencies — never commit. node_modules/ matches at any depth.
 node_modules/
+**/node_modules/
+.pnpm-store/
+
+# Build outputs
 dist/
+build/
 .vite/
 .output/
 .vinxi/
 .tanstack/
 .cache/
+
+# Env files — only .env.example is tracked
 *.env
 *.env.*
 !*.env.example
+
+# Editor / OS
 .DS_Store
-*.local
-*.log
 .idea/
 .vscode/
+*.swp
+*.swo
+
+# Test / log artifacts
 coverage/
+*.log
+
+# Local user files
+*.local
