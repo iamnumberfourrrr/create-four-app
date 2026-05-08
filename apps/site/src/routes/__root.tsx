@@ -25,6 +25,7 @@ export const Route = createRootRoute({
           "An opinionated CLI that scaffolds a TanStack + Drizzle pnpm monorepo. Composable, idempotent.",
       },
     ],
+    links: [{ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
   }),
   component: RootDocument,
 });
