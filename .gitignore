@@ -3,3 +3,5 @@ dist/
 *.tsbuildinfo
 .DS_Store
 .tanstack/
+apps/site/.wrangler/
+apps/site/.dev.vars

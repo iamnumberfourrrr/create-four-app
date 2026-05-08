@@ -8,7 +8,9 @@
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "wrangler deploy",
+    "preview:wrangler": "wrangler dev"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.6",
@@ -27,6 +29,7 @@
     "@vitejs/plugin-react": "^6.0.1",
     "tailwindcss": "^4.1.16",
     "typescript": "^5.8.3",
-    "vite": "8.0.10"
+    "vite": "8.0.10",
+    "wrangler": "^4.90.0"
   }
 }

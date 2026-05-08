@@ -1,0 +1,12 @@
+name = "create-four-app-site"
+main = "dist/server/server.js"
+compatibility_date = "2026-05-07"
+compatibility_flags = ["nodejs_compat"]
+
+routes = [
+  { pattern = "create.onlyfour.org", custom_domain = true },
+]
+
+[assets]
+directory = "dist/client"
+binding = "ASSETS"
